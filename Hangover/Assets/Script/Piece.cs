@@ -8,7 +8,6 @@ public class Piece : MonoBehaviour
     public int y; // Posição Y da peça no tabuleiro
     public Board board; // Referência ao tabuleiro
     public bool isInvisible; // Determina se a peça é invisível
-    public bool IsActive { get; private set; } = true;
 
     private Renderer pieceRenderer;
 
@@ -87,15 +86,6 @@ public class Piece : MonoBehaviour
         // Cancela qualquer Tween ativo associado a este transform
         transform.DOKill();
     }
-
-    public void DestroyPiece()
-    {
-        IsActive = false;
-        // Se necessário, adicione lógica para efeitos visuais ou animações.
-        Destroy(gameObject);
-    }
-
-
 }
 
 // Enumeração para os tipos de frutas disponíveis

@@ -5,17 +5,17 @@ using DG.Tweening;
 
 public class Board : MonoBehaviour
 {
-    [Header("Tamanho do Tabuleiro")]
+    [Header("Tamanho do tabuleiro")]
     public int width;
     public int height;
 
-    [SerializeField] private int jogadas;
-    public GameObject[] piecePrefabs;
+    [SerializeField] int jogadas;
+    public GameObject[] piecePrefab;
     public Piece[,] pieces;
     private Piece selectedPiece;
     private bool canSwap = true;
     public Transform cam;
-    [SerializeField] private GameObject particlePopMagic;
+    [SerializeField] GameObject particle_popMagic;
 
     private binaryArray binaryArray;
 
@@ -32,7 +32,7 @@ public class Board : MonoBehaviour
         cam.transform.position = new Vector3((float)width / 2 - 0.5f, (float)height / 2 - 0.5f, -10);
     }
 
-    void Update()
+    private void Update()
     {
         if (GameManager.instance.jogadas == 0)
         {
@@ -48,7 +48,8 @@ public class Board : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (IsEmptyPosition(x, y, initialBools))
+                int index = x + y * width;
+                if (index < initialBools.Length && initialBools[index])
                 {
                     pieces[x, y] = CreateEmptyPiece(x, y);
                 }
@@ -60,12 +61,6 @@ public class Board : MonoBehaviour
         }
 
         CheckForMatches(out _);
-    }
-
-    bool IsEmptyPosition(int x, int y, bool[] initialBools)
-    {
-        int index = x + y * width;
-        return index < initialBools.Length && initialBools[index];
     }
 
     Piece CreateEmptyPiece(int x, int y)
@@ -80,14 +75,14 @@ public class Board : MonoBehaviour
 
     void SpawnPiece(int x, int y)
     {
-        GameObject newPiece = Instantiate(piecePrefabs[RandomFrut()], new Vector3(x, y, 0), Quaternion.identity);
+        GameObject newPiece = Instantiate(piecePrefab[RandomFrut()], new Vector3(x, y, 0), Quaternion.identity);
         pieces[x, y] = newPiece.GetComponent<Piece>();
         pieces[x, y]?.Init(x, y, this);
     }
 
     int RandomFrut()
     {
-        return Random.Range(0, piecePrefabs.Length);
+        return Random.Range(0, piecePrefab.Length);
     }
 
     public void SelectPiece(Piece piece)
@@ -96,35 +91,30 @@ public class Board : MonoBehaviour
 
         if (selectedPiece == null)
         {
-            SelectFirstPiece(piece);
-        }
-        else if (IsAdjacent(selectedPiece, piece))
-        {
-            StartCoroutine(TrySwapPieces(selectedPiece, piece));
+            // Seleciona a peça pela primeira vez
+            selectedPiece = piece;
+            selectedPiece.IncreaseScale(new Vector3(0.8f, 0.8f), 0.4f); // Cresce a peça com overshoot
         }
         else
         {
-            DeselectPreviousPiece();
-            SelectNewPiece(piece);
+            // Verifica se a peça selecionada é adjacente à peça atual
+            if (IsAdjacent(selectedPiece, piece))
+            {
+                selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true); // Volta ao tamanho normal com overshoot reverso
+                piece.IncreaseScale(new Vector3(0.8f, 0.8f), 0.4f); // Cresce a nova peça selecionada
+                StartCoroutine(TrySwapPieces(selectedPiece, piece));
+            }
+            else
+            {
+                // A peça não é adjacente, então apenas atualiza a seleção
+                selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true); // Volta ao tamanho normal
+                selectedPiece = piece;
+                selectedPiece.IncreaseScale(new Vector3(0.8f, 0.8f), 0.4f); // Cresce a nova peça
+            }
         }
+
     }
 
-    void SelectFirstPiece(Piece piece)
-    {
-        selectedPiece = piece;
-        selectedPiece.IncreaseScale(new Vector3(0.8f, 0.8f), 0.4f);
-    }
-
-    void DeselectPreviousPiece()
-    {
-        selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true);
-    }
-
-    void SelectNewPiece(Piece piece)
-    {
-        selectedPiece = piece;
-        selectedPiece.IncreaseScale(new Vector3(0.8f, 0.8f), 0.4f);
-    }
 
     bool IsAdjacent(Piece piece1, Piece piece2)
     {
@@ -142,7 +132,8 @@ public class Board : MonoBehaviour
         if (!HasMatches())
         {
             SwapPieces(piece1, piece2);
-            DeselectPreviousPiece();
+            selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true);
+            selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true);
         }
         else
         {
@@ -156,13 +147,11 @@ public class Board : MonoBehaviour
 
     void SwapPieces(Piece piece1, Piece piece2)
     {
-        if (piece1 == null || piece2 == null) return; // Adicione esta linha
-
         (pieces[piece1.x, piece1.y], pieces[piece2.x, piece2.y]) = (piece2, piece1);
         piece1.Init(piece2.x, piece2.y, this);
         piece2.Init(piece1.x, piece1.y, this);
 
-        Vector3 tempPosition = piece1.transform.position; // Verifique se piece1 e piece2 não são nulos
+        Vector3 tempPosition = piece1.transform.position;
         piece1.transform.position = piece2.transform.position;
         piece2.transform.position = tempPosition;
     }
@@ -231,13 +220,6 @@ public class Board : MonoBehaviour
             }
         }
 
-        DestroyMatchedPieces(piecesToDestroy);
-        StartCoroutine(RefillBoard());
-        return piecesToDestroy;
-    }
-
-    void DestroyMatchedPieces(List<Piece> piecesToDestroy)
-    {
         foreach (Piece piece in piecesToDestroy)
         {
             if (piece != null && piece.gameObject != null)
@@ -245,12 +227,17 @@ public class Board : MonoBehaviour
                 pieces[piece.x, piece.y] = null;
                 if (piece.frutType != FrutType.Vazio)
                 {
-                    Instantiate(particlePopMagic, new Vector3(piece.x, piece.y), Quaternion.identity);
+                    Instantiate(particle_popMagic, new Vector3(piece.x, piece.y), Quaternion.identity);
                 }
+                // Cancela os Tweens associados ao objeto antes de destruí-lo
                 piece.transform.DOKill();
                 Destroy(piece.gameObject);
             }
         }
+
+
+        StartCoroutine(RefillBoard());
+        return piecesToDestroy;
     }
 
     List<Piece> GetMatchPieces(int x, int y)
@@ -285,52 +272,85 @@ public class Board : MonoBehaviour
 
         bool[] initialBools = binaryArray.GetInitialBools();
 
-        MoveExistingPieces(initialBools);
-        RefillNewPieces(initialBools);
+        // Mover peças existentes para espaços vazios
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                int index = x + y * width;
+                if (pieces[x, y] == null && (index >= initialBools.Length || !initialBools[index]))
+                {
+                    for (int k = y + 1; k < height; k++)
+                    {
+                        if (pieces[x, k] != null)
+                        {
+                            // A posição da peça anterior deve ser atualizada no array
+                            MovePiece(pieces[x, k], new Vector3(x, y, 0), 0.3f);
+                            pieces[x, k].Init(x, y, this);
+                            pieces[x, y] = pieces[x, k];
+                            pieces[x, k] = null;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Repor peças novas
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                int index = x + y * width;
+
+                if (pieces[x, y] == null && (index >= initialBools.Length || !initialBools[index]))
+                {
+                    GameObject newPiece = Instantiate(piecePrefab[RandomFrut()], new Vector3(x, height, 0), Quaternion.identity);
+                    pieces[x, y] = newPiece.GetComponent<Piece>();
+                    pieces[x, y]?.Init(x, y, this);
+                    MovePiece(pieces[x, y], new Vector3(x, y, 0), 0.3f);
+                }
+            }
+        }
         CheckForMatches(out _);
     }
 
-    void MoveExistingPieces(bool[] initialBools)
+    void MovePiece(Piece piece, Vector3 newPosition, float duration)
+    {
+        if (piece == null || piece.gameObject == null) return;  // Verifica se a peça não foi destruída
+        piece.transform.DOMove(newPosition, duration).SetEase(Ease.InOutQuad);
+    }
+    
+
+    bool CanMatchBeMade(int x1, int y1, int x2, int y2)
+    {
+        if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
+            x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) return false;
+
+        if (Mathf.Abs(x1 - x2) + Mathf.Abs(y1 - y2) != 1) return false;
+
+        SwapPieces(pieces[x1, y1], pieces[x2, y2]);
+        bool matchFound = HasMatches();
+        SwapPieces(pieces[x1, y1], pieces[x2, y2]);
+
+        return matchFound;
+    }
+
+    public bool HasPossibleMatches()
     {
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (pieces[x, y] == null && !IsEmptyPosition(x, y, initialBools))
+                if (pieces[x, y] == null) continue;
+
+                if (CanMatchBeMade(x, y, x + 1, y) || CanMatchBeMade(x, y, x, y + 1))
                 {
-                    MovePieceDownward(x, y);
+                    return true;
                 }
             }
         }
-    }
-
-    void MovePieceDownward(int x, int y)
-    {
-        for (int k = y + 1; k < height; k++)
-        {
-            if (pieces[x, k] != null)
-            {
-                pieces[x, k].transform.DOMoveY(y, 0.2f);
-                pieces[x, k].Init(x, y, this);
-                pieces[x, y] = pieces[x, k];
-                pieces[x, k] = null;
-                return;
-            }
-        }
-    }
-
-    void RefillNewPieces(bool[] initialBools)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                if (pieces[x, y] == null && !IsEmptyPosition(x, y, initialBools))
-                {
-                    SpawnPiece(x, y);
-                }
-            }
-        }
+        return false;
     }
 
     IEnumerator GameOver()
