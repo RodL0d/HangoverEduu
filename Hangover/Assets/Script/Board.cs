@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using System.Linq;
 
 public class Board : MonoBehaviour
 {
@@ -9,18 +10,25 @@ public class Board : MonoBehaviour
     public int width;
     public int height;
 
-    [SerializeField] int jogadas;
+    public int jogadas;
+    public int jogadasBase = 10; 
+    private UIManager managerUI;
     public GameObject[] piecePrefab;
     public Piece[,] pieces;
-    private Piece selectedPiece;
+    public Piece selectedPiece;
     private bool canSwap = true;
     public Transform cam;
     [SerializeField] GameObject particle_popMagic;
+    public int boardWidth;
+    public int boardHeight;
 
     private binaryArray binaryArray;
 
     void Start()
     {
+        jogadas = jogadasBase;
+        managerUI = FindObjectOfType<UIManager>(); 
+        UpdateJogadas();
         pieces = new Piece[width, height];
         binaryArray = GetComponent<binaryArray>();
         InitializeBoard();
@@ -34,7 +42,7 @@ public class Board : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.instance.jogadas == 0)
+        if (jogadas == 0)
         {
             StartCoroutine(GameOver());
         }
@@ -60,7 +68,20 @@ public class Board : MonoBehaviour
             }
         }
 
-        CheckForMatches(out _);
+        // Garantir que o tabuleiro não contenha nenhum match inicial
+        while (HasMatches())
+        {
+            ResolveInitialMatches();
+        }
+    }
+
+    public void UpdateJogadas(int jogadasValue = 0)
+    {
+        jogadas += jogadasValue;
+        if (managerUI != null)
+        {
+            managerUI.UpdateJogadas(jogadas); 
+        }
     }
 
     Piece CreateEmptyPiece(int x, int y)
@@ -71,6 +92,30 @@ public class Board : MonoBehaviour
         emptyPiece.Init(x, y, this);
         emptyPiece.SetVisibility(false);
         return emptyPiece;
+    }
+
+    void ResolveInitialMatches()
+    {
+        int totalDestroyed;
+        List<Piece> piecesToDestroy = CheckForMatches(out totalDestroyed);
+
+        // Se houver matches, substitui uma das peças envolvidas
+        if (piecesToDestroy.Count > 0)
+        {
+            foreach (Piece piece in piecesToDestroy)
+            {
+                if (piece != null)
+                {
+                    ReplacePiece(piece.x, piece.y);
+                }
+            }
+        }
+    }
+    void ReplacePiece(int x, int y)
+    {
+        // Substitui a peça atual por uma nova de tipo aleatório
+        Destroy(pieces[x, y].gameObject);
+        SpawnPiece(x, y);
     }
 
     void SpawnPiece(int x, int y)
@@ -116,6 +161,9 @@ public class Board : MonoBehaviour
     }
 
 
+
+
+
     bool IsAdjacent(Piece piece1, Piece piece2)
     {
         return (Mathf.Abs(piece1.x - piece2.x) == 1 && piece1.y == piece2.y) ||
@@ -124,29 +172,39 @@ public class Board : MonoBehaviour
 
     IEnumerator TrySwapPieces(Piece piece1, Piece piece2)
     {
-        canSwap = false;
+       canSwap = false;
 
-        SwapPieces(piece1, piece2);
-        yield return new WaitForSeconds(0.1f);
+    SwapPieces(piece1, piece2);
+    yield return new WaitForSeconds(0.1f);
 
-        if (!HasMatches())
-        {
-            SwapPieces(piece1, piece2);
-            selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true);
-            selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true);
-        }
-        else
+    int totalDestroyed;
+    List<Piece> piecesToDestroy = CheckForMatches(out totalDestroyed);
+
+    if (piecesToDestroy.Count == 0)
+    {
+        SwapPieces(piece1, piece2); // Reverte a troca
+        selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true);
+        selectedPiece.IncreaseScale(new Vector3(-0.8f, -0.8f), 0.3f, true);
+    }
+    else
         {
             CheckForMatches(out _);
         }
 
-        GameManager.instance.UpdateJogadas(-1);
+        UpdateJogadas(-1);
         selectedPiece = null;
         canSwap = true;
     }
 
-    void SwapPieces(Piece piece1, Piece piece2)
+    public void SwapPieces(Piece piece1, Piece piece2)
     {
+        // Verifica se as peças ainda existem
+        if (piece1 == null || piece2 == null)
+        {
+            Debug.LogWarning("Uma das peças foi destruída antes de tentar trocar.");
+            return;
+        }
+
         (pieces[piece1.x, piece1.y], pieces[piece2.x, piece2.y]) = (piece2, piece1);
         piece1.Init(piece2.x, piece2.y, this);
         piece2.Init(piece1.x, piece1.y, this);
@@ -158,45 +216,11 @@ public class Board : MonoBehaviour
 
     bool HasMatches()
     {
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                if (pieces[x, y] == null) continue;
+        int totalDestroyed;
+        List<Piece> piecesToDestroy = CheckForMatches(out totalDestroyed);
 
-                if (CheckMatchHorizontal(x, y) || CheckMatchVertical(x, y))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    bool CheckMatchHorizontal(int x, int y)
-    {
-        FrutType currentType = pieces[x, y].frutType;
-        int count = 1;
-
-        for (int i = x + 1; i < width && pieces[i, y]?.frutType == currentType; i++)
-        {
-            count++;
-        }
-
-        return count >= 3;
-    }
-
-    bool CheckMatchVertical(int x, int y)
-    {
-        FrutType currentType = pieces[x, y].frutType;
-        int count = 1;
-
-        for (int i = y + 1; i < height && pieces[x, i]?.frutType == currentType; i++)
-        {
-            count++;
-        }
-
-        return count >= 3;
+        // Retorna verdadeiro se houver peças para destruir (ou seja, se houver matches)
+        return piecesToDestroy.Count > 0;
     }
 
     List<Piece> CheckForMatches(out int totalDestroyed)
@@ -210,16 +234,61 @@ public class Board : MonoBehaviour
             {
                 if (pieces[x, y] == null) continue;
 
-                List<Piece> matchPieces = GetMatchPieces(x, y);
-                if (matchPieces.Count >= 3)
+                // Verifica linha horizontal
+                if (x < width - 2)
                 {
-                    piecesToDestroy.AddRange(matchPieces);
-                    totalDestroyed += matchPieces.Count;
-                    GameManager.instance.AddScore(10);
+                    int matchLength = 1;
+                    FrutType currentType = pieces[x, y].frutType;
+                    for (int k = 1; k < width - x; k++)
+                    {
+                        if (pieces[x + k, y] != null && pieces[x + k, y].frutType == currentType)
+                        {
+                            matchLength++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    if (matchLength >= 3)
+                    {
+                        for (int k = 0; k < matchLength; k++)
+                        {
+                            piecesToDestroy.Add(pieces[x + k, y]);
+                            totalDestroyed++;
+                        }
+                    }
+                }
+
+                // Verifica coluna vertical
+                if (y < height - 2)
+                {
+                    int matchLength = 1;
+                    FrutType currentType = pieces[x, y].frutType;
+                    for (int k = 1; k < height - y; k++)
+                    {
+                        if (pieces[x, y + k] != null && pieces[x, y + k].frutType == currentType)
+                        {
+                            matchLength++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    if (matchLength >= 3)
+                    {
+                        for (int k = 0; k < matchLength; k++)
+                        {
+                            piecesToDestroy.Add(pieces[x, y + k]);
+                            totalDestroyed++;
+                        }
+                    }
                 }
             }
         }
 
+        // Destrói as peças combinadas
         foreach (Piece piece in piecesToDestroy)
         {
             if (piece != null && piece.gameObject != null)
@@ -235,10 +304,11 @@ public class Board : MonoBehaviour
             }
         }
 
-
         StartCoroutine(RefillBoard());
         return piecesToDestroy;
     }
+
+   
 
     List<Piece> GetMatchPieces(int x, int y)
     {
@@ -320,7 +390,7 @@ public class Board : MonoBehaviour
         if (piece == null || piece.gameObject == null) return;  // Verifica se a peça não foi destruída
         piece.transform.DOMove(newPosition, duration).SetEase(Ease.InOutQuad);
     }
-    
+
 
     bool CanMatchBeMade(int x1, int y1, int x2, int y2)
     {

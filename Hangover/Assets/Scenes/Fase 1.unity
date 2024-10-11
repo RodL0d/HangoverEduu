@@ -2289,6 +2289,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1032095336}
     - target: {fileID: 5653086171243154531, guid: db76c244efaf5044f97e47d9be74a612, type: 3}
+      propertyPath: jogadas
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5653086171243154531, guid: db76c244efaf5044f97e47d9be74a612, type: 3}
       propertyPath: jogodas
       value: 2
       objectReference: {fileID: 0}

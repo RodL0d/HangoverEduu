@@ -23,8 +23,7 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-
-    public int scorePlayer, jogadas,jogadasBase;
+    public int scorePlayer;
 
     UIManager managerUI;
 
@@ -33,6 +32,7 @@ public class GameManager : MonoBehaviour
         Initialize();
         SceneManager.sceneLoaded += Initialize;
     }
+
     private void Initialize()
     {
         InitializeBase();
@@ -42,22 +42,16 @@ public class GameManager : MonoBehaviour
     {
         InitializeBase();
         scorePlayer = 0;
-        jogadas = jogadasBase;
-        if (SceneManager.GetActiveScene().name == "Fase 1") 
-        {
-            UpdateJogadas(jogadas);
-        }
-        
+
+        // Remover lógica de jogadas aqui
     }
 
     private void InitializeBase()
     {
-        
         FindButtons();
         managerUI = FindObjectOfType<UIManager>();
         Time.timeScale = 1;
     }
-
 
     private void FindButtons()
     {
@@ -105,11 +99,6 @@ public class GameManager : MonoBehaviour
 
     public void UpdateGameOver(string textGameover)
     {
-        managerUI.UpdateTextGameOver(textGameover); 
-    }
-    public void UpdateJogadas(int jogadasValue)
-    {
-        jogadas += jogadasValue;
-        managerUI.UpdateJogadas(jogadas);
+        managerUI.UpdateTextGameOver(textGameover);
     }
 }
