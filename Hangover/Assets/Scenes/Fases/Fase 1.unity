@@ -255,6 +255,94 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 276674689}
   m_CullTransparentMesh: 1
+--- !u!1 &286732858
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 286732859}
+  - component: {fileID: 286732862}
+  - component: {fileID: 286732861}
+  - component: {fileID: 286732860}
+  m_Layer: 5
+  m_Name: FadePainel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &286732859
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286732858}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1703274500}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &286732860
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286732858}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &286732861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286732858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &286732862
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286732858}
+  m_CullTransparentMesh: 1
 --- !u!1 &300422363
 GameObject:
   m_ObjectHideFlags: 0
@@ -1234,7 +1322,7 @@ MonoBehaviour:
   scoreText: {fileID: 2123501548}
   jogadasText: {fileID: 785472551}
   gameoverText: {fileID: 300422365}
-  buttonclose: {fileID: 1181572643}
+  buttonClose: {fileID: 0}
   menuPanel: {fileID: 1975821874}
 --- !u!4 &1209041558
 Transform:
@@ -1495,7 +1583,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1209041557}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: ActiveMenu
+        m_MethodName: ToggleMenu
         m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1932,7 +2020,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1209041557}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: RedtartScene
+        m_MethodName: RestartGame
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2324,6 +2412,7 @@ RectTransform:
   m_Children:
   - {fileID: 634206657}
   - {fileID: 1975821875}
+  - {fileID: 286732859}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2674,8 +2763,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   width: 5
+<<<<<<< Updated upstream:Hangover/Assets/Scenes/Fases/Fase 1.unity
   size: 30
   initialBools: 000000000000000000000000000000000000000000000000000000000000
+=======
+  height: 6
+  moveDuration: 0.5
+  fruitPrefabs:
+  - {fileID: 5090536341604393258, guid: 9aa81cd871ed5b542b32e4c614621727, type: 3}
+  - {fileID: 5766391664119410148, guid: e36370fc2ccd85442bb8ad08917eaed8, type: 3}
+  - {fileID: 8838499904282740777, guid: 88339dc5501b1df4bbf8f2cbcb692b92, type: 3}
+  - {fileID: 6874434505175374339, guid: 48f4979ab729d1440b4d083e886c57ad, type: 3}
+  - {fileID: 3612017322786362154, guid: a87420bb18f88f0418b1b9e9962e1b44, type: 3}
+  - {fileID: 6319861555613119749, guid: 256254138fe544c43a21812514f9b104, type: 3}
+  - {fileID: 5018873714049314917, guid: 70931bad00c870d4b90dd5d3d3de209a, type: 3}
+  cerejaPrefab: {fileID: 5189414865226056622, guid: b51adcd8152e1314bb160e1a5815c439, type: 3}
+  romaPrefab: {fileID: 5277923847060947649, guid: 7cb1a78401bb38347a8f3d8f35fd556e, type: 3}
+  amoraPrefab: {fileID: 3709904927056707482, guid: 100fda708a1579c4f9a42f473dc93945, type: 3}
+  jogadas: 20
+>>>>>>> Stashed changes:Hangover/Assets/Scenes/Fase 1.unity
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

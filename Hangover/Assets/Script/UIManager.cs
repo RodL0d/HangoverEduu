@@ -7,10 +7,11 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [SerializeField]TextMeshProUGUI scoreText, jogadasText, gameoverText;
-    [SerializeField]Button  buttonclose;
+    [SerializeField] Button buttonClose;
     [SerializeField]GameObject menuPanel;
 
-    public void RedtartScene(string sceneName)
+    // Método para reiniciar a cena atual
+    public void RestartGame(string sceneName)
     {
         menuPanel.SetActive(false);
         GameManager.instance.LoadScene(sceneName);
@@ -21,33 +22,30 @@ public class UIManager : MonoBehaviour
         GameManager.instance.LoadScene(sceneName);
     }
 
-    public void ActiveMenu(bool ativo)
+    public void ToggleMenu(bool isActive)
     {
-        if (ativo)
-        {
-          menuPanel.SetActive(true);
-          Time.timeScale = 0f;
-        }
-        else
-        {
-          menuPanel.SetActive(false);
-          Time.timeScale = 1f;
-        }
-    }
-    public void UpdateTextGameOver(string textGameover)
-    {
-        gameoverText.text = textGameover;
-        menuPanel.SetActive(true);
-        Time.timeScale = 0f;
-        buttonclose.enabled = false;
-    }
-    public void UpdateJogadas(int jogadas)
-    {
-        jogadasText.text = jogadas.ToString(); ;
+        menuPanel.SetActive(isActive);
+        Time.timeScale = isActive ? 0f : 1f;
     }
 
-    public void UpdateScore(int valueScoore)
+    // Atualiza o texto de game over e exibe o menu de fim de jogo
+    public void ShowGameOver(string textGameOver)
     {
-        scoreText.text = valueScoore.ToString();
+        gameoverText.text = textGameOver;
+        menuPanel.SetActive(true);
+        Time.timeScale = 0f;
+        buttonClose.enabled = false;
+    }
+
+    // Atualiza o texto de jogadas restantes
+    public void UpdateJogadas(int jogadas)
+    {
+        jogadasText.text = jogadas.ToString();
+    }
+
+    // Atualiza o texto da pontuação
+    public void UpdateScore(int score)
+    {
+        scoreText.text = score.ToString();
     }
 }
