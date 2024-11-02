@@ -24,7 +24,6 @@ public class Piece : MonoBehaviour
             pieceRenderer.enabled = isVisible;
         }
     }
-<<<<<<< Updated upstream
     public void Init(int x, int y, Board board)
     {
         this.x = x;
@@ -62,22 +61,10 @@ public class Piece : MonoBehaviour
         {
             board.SelectPiece(this);
         }
-=======
-
-    public virtual void Init(int x, int y, GridManager gridManager)
-    {
-        this.x = x;
-        this.y = y;
-        this.gridManager = gridManager;
-        isMarkedForDestruction = false;
-        isInvisible = false;
-        SetVisibility(true);
->>>>>>> Stashed changes
     }
 
     public void StartMoveAnimation(Vector3 newPosition, float duration)
     {
-<<<<<<< Updated upstream
         targetPosition = newPosition;
         moveDuration = duration;
         isMoving = true;
@@ -110,47 +97,6 @@ public class Piece : MonoBehaviour
     }
 }
 // Enumeração para os tipos de frutas disponíveis
-=======
-        isInvisible = !visible;
-        if (pieceRenderer != null)
-        {
-            pieceRenderer.enabled = visible;
-        }
-    }
-
-    public void MarkForDestruction()
-    {
-        if (!isMarkedForDestruction)
-        {
-            isMarkedForDestruction = true;
-            SetVisibility(false);
-        }
-    }
-
-    public virtual void AnimateDestruction()
-    {
-        if (isMarkedForDestruction)
-        {
-            transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack).OnComplete(() =>
-            {
-                if (gridManager.grid[x, y] == this)
-                {
-                    gridManager.grid[x, y] = null;
-                }
-                Destroy(gameObject);
-            });
-        }
-    }
-
-    protected virtual void OnMouseDown()
-    {
-        if (!isInvisible && gridManager != null)
-        {
-            gridManager.SelectPiece(this);
-        }
-    }
-}
->>>>>>> Stashed changes
 public enum FrutType
 {
     Abacaxi,
@@ -162,13 +108,5 @@ public enum FrutType
     Uva,
     Poder,
     Obstacle,
-<<<<<<< Updated upstream
     Vazio
 }
-=======
-    Vazio,
-    Cereja, // Power-up que explode
-    Roma, // Power-up de foguetes
-    Amora // poder de estourar peças
-}
->>>>>>> Stashed changes
